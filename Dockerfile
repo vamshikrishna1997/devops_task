@@ -5,8 +5,8 @@ RUN java --version
 # tomcat install
 RUN apt-get install wget -y
 WORKDIR  /opt
-RUN wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.7/bin/apache-tomcat-10.1.7.tar.gz && \
-    tar -xvzf /opt/apache-tomcat-10.1.7.tar.gz && mv apache-tomcat-10.1.7 tomcat && \
+RUN wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.8/bin/apache-tomcat-10.1.8.tar.gz && \
+    tar -xvzf /opt/apache-tomcat-10.1.8.tar.gz && mv apache-tomcat-10.1.8 tomcat && \
     chmod 777 /opt/tomcat/bin/*.sh
 COPY webapp.war  /opt/tomcat/webapps
 CMD  ["catalina.sh", "run"]
