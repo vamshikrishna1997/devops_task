@@ -1,0 +1,12 @@
+---
+- name: Create a file
+  hosts: app
+  become: true
+
+ 
+
+  tasks:
+    - name: Create file
+      ansible.builtin.file:
+        path: /home/ubuntu/test.txt
+        state: touch
