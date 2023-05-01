@@ -1,0 +1,7 @@
+---
+# vars file for dockerapp
+#
+app_name: webapp
+app_version: webapp
+
+port: 8082:8080

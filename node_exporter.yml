@@ -1,0 +1,7 @@
+
+- name: Install node_exporter
+  hosts: app
+  become: yes
+
+  roles:
+    - node_exporter

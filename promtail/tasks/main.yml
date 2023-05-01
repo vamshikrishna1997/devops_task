@@ -1,0 +1,49 @@
+
+- name: Install unzip package
+  apt:
+    name: unzip
+    state: present
+
+- name: Download Promtail
+  get_url:
+    url: https://github.com/grafana/loki/releases/download/v2.8.0/promtail-linux-amd64.zip
+    dest: /opt
+
+- name: Extract Promtail
+  unarchive:
+    src: /opt/promtail-linux-amd64.zip
+    dest: /opt
+    remote_src: yes
+
+- name: crate dir
+  file:
+    state: directory
+    path: /opt/promtail  
+
+- name: Set Promtail configuration file
+  copy:
+    src: promtail-local-config.yaml
+    dest: /opt/promtail/promtail-local-config.yaml
+
+- name: Set Promtail systemd unit file
+  copy:
+    content: |
+      [Unit]
+      Description=Promtail client for sending logs to Loki
+      After=network.target
+
+      [Service]
+      ExecStart=/opt/promtail/promtail -config.file=/opt/promtail/promtail-local-config.yaml
+      Restart=always
+      TimeoutStopSec=3
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/promtail.service
+
+- name: Start Promtail service
+  systemd:
+    name: promtail
+    enabled: yes
+    state: started
+

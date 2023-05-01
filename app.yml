@@ -1,0 +1,13 @@
+- name: Install docker
+  hosts: app
+  become: true
+
+  roles:
+    - docker
+
+- name: app deployment
+  hosts: app
+  become: true
+
+  roles:
+    - dockerwebapp

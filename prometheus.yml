@@ -1,0 +1,6 @@
+---
+- name: Install and start prometheus
+  hosts: grafana
+  become: true
+  roles:
+    - prometheus

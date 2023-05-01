@@ -1,0 +1,18 @@
+- name: Add Loki repository
+  apt_repository:
+    repo: 'deb https://packages.grafana.com/loki/deb stable main'
+    state: present
+    update_cache: false
+
+- name: Install Loki
+  apt:
+    name: loki
+    state: present
+
+- name: Configure Loki
+  copy:
+    src: loki-local-config.yaml
+    dest: /etc/loki/loki.yml
+  notify: restart loki
+
+

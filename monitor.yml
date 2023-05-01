@@ -1,0 +1,27 @@
+- name: Install node_exporter
+  hosts: app
+  become: true
+
+  roles:
+    - node_exporter
+
+- name: Install prometheus
+  hosts: grafana
+  become: true
+
+  roles:
+    - prometheus
+
+- name: Install promtail
+  hosts: app
+  become: true
+
+  roles:
+    - promtail
+
+- name: Install loki
+  hosts: app
+  become: true
+
+  roles:
+    - loki

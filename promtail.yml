@@ -1,0 +1,6 @@
+- name: Install promtail
+  hosts: app
+  become: yes
+
+  roles:
+    - promtail

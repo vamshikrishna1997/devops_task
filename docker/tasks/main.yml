@@ -1,0 +1,27 @@
+---
+# tasks file for docker
+#
+- name: update cache
+  apt:
+    update_cache: yes
+
+- name: required packages
+  apt:
+    name: "{{packages}}"
+    state: present 
+ 
+- name: add key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: add repo
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: install docker
+  apt:
+    name: docker-ce
+    state: present  
+    

@@ -1,0 +1,120 @@
+---
+# tasks file for prometheus
+#
+
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Create Prometheus user
+  become_user: root
+  user:
+    name: prometheus
+    shell: /bin/false
+    system: true
+
+- name: Create directories and set ownership
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    recurse: yes
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - gnupg2
+    state: present
+
+- name: Download and install Prometheus
+  become_user: root
+  shell: |
+    curl -LO https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+    tar -xvf prometheus-2.43.0.linux-amd64.tar.gz
+    cp prometheus-2.43.0.linux-amd64/prometheus /usr/local/bin
+    cp prometheus-2.43.0.linux-amd64/promtool /usr/local/bin
+
+- name: Set ownership for dir1 and dir2
+  file:
+    path: "{{ item }}"
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - /usr/local/bin/prometheus
+    - /usr/local/bin/promtool
+
+- name: Copy files and change ownership
+  become: true
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: prometheus
+    group: prometheus
+    remote_src: true  
+  loop:
+    - { src: "prometheus-2.43.0.linux-amd64/consoles", dest: "/etc/prometheus" }
+    - { src: "prometheus-2.43.0.linux-amd64/console_libraries", dest: "/etc/prometheus" }
+
+
+- name: Create configuration file for Prometheus
+  become_user: root
+  copy:
+    dest: /etc/prometheus/prometheus.yml
+    content: |
+      global:
+        scrape_interval: 15s
+
+      scrape_configs:
+        - job_name: 'prometheus'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['localhost:9090']
+
+        - job_name: 'node_exporter'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['172.31.16.28']      
+
+- name: Create configuration file for Prometheu to start
+  become_user: root
+  copy:
+    dest: /etc/systemd/system/prometheus.service
+    content: |
+      [Unit]
+      Description=Prometheus
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=prometheus
+      Group=prometheus
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus \
+          --config.file /etc/prometheus/prometheus.yml \
+          --storage.tsdb.path /var/lib/prometheus/ \
+          --web.console.templates=/etc/prometheus/consoles \
+          --web.console.libraries=/etc/prometheus/console_libraries
+
+      [Install]
+      WantedBy=multi-user.target
+
+
+- name: Reload systemd and start Prometheus
+  systemd:
+    daemon_reload: yes
+    name: prometheus
+    state: started
+
+- name: Check Prometheus status
+  systemd:
+    name: prometheus
+    state: started
+

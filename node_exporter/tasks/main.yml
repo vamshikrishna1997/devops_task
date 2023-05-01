@@ -1,0 +1,54 @@
+
+- name: Download and extract Node Exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz"
+    dest: /tmp
+  become: true
+
+- name: extractor presents
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - tar
+    state: present
+  become: true
+
+- name: extract archive
+  ansible.builtin.unarchive:
+    src: "/tmp/node_exporter-1.5.0.linux-amd64.tar.gz"
+    dest: "/opt"
+    remote_src: true
+    validate_certs: true
+
+- name: copy bin file
+  copy:
+    src: "/opt/node_exporter-1.5.0.linux-amd64/node_exporter"
+    dest: "/usr/local/bin"
+    remote_src: true 
+  become: true  
+
+- name: Create Node Exporter systemd service
+  copy:
+    content: |
+      [Unit]
+      Description=Node Exporter
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=node_exporter
+      Group=node_exporter
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/node_exporter.service
+
+- name: start node exporter
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes  
+
+

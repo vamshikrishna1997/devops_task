@@ -1,0 +1,19 @@
+---
+# tasks file for dockerapp
+#  
+- name: build image
+  docker_image: 
+    name: "{{app_name}}:{{app_version}}"
+    source: build
+    build:
+      path: /root
+    
+
+- name: create container
+  docker_container:
+    name: "{{app_name}}"
+    image: "{{app_name}}:{{app_version}}"
+    ports: 
+      - "{{port}}"  
+    state: started  
+      
