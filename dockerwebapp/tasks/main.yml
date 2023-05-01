@@ -6,7 +6,7 @@
     name: "{{app_name}}:{{app_version}}"
     source: build
     build:
-      path: /var/lib/jenkins/workspace/ansible
+      path: /root
     
 
 - name: create container
